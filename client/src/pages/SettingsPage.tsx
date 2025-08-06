@@ -3,13 +3,8 @@ import { motion } from 'framer-motion';
 import { 
   Settings, 
   User, 
-  Shield, 
-  Bell, 
-  Palette, 
   Download, 
   Trash2, 
-  Moon, 
-  Sun,
   Eye,
   EyeOff,
   Save,
