@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleanup Pro - 사진 정리 앱</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0;
+            background: white;
+            border-radius: 20px 20px 0 0;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .stats-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #eee;
+            overflow-x: auto;
+            position: sticky;
+            top: 80px;
+            z-index: 90;
+        }
+
+        .tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .tab:hover {
+            background: #f5f5f5;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            padding: 20px 0;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .photo-item:hover {
+            transform: scale(1.05);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-select {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.9);
+            border: 2px solid #ddd;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .photo-select.selected {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+
+        .photo-select::after {
+            content: '✓';
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .photo-select.selected::after {
+            opacity: 1;
+        }
+
+        .duplicate-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: #ff4757;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .tinder-container {
+            max-width: 400px;
+            margin: 0 auto;
+            height: 600px;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .tinder-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            cursor: grab;
+            overflow: hidden;
+            transform-origin: center bottom;
+            transition: transform 0.3s ease;
+        }
+
+        .tinder-card:active {
+            cursor: grabbing;
+        }
+
+        .tinder-card img {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+        }
+
+        .tinder-card-info {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .tinder-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .action-btn.delete {
+            background: #ff4757;
+            color: white;
+        }
+
+        .action-btn.keep {
+            background: #2ed573;
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff3742;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #2ed573;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #26d566;
+            transform: translateY(-2px);
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2ed573;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .trash-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .trash-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 15px;
+        }
+
+        .trash-item-info {
+            flex: 1;
+        }
+
+        .trash-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .header {
+                border-radius: 0;
+                padding: 15px;
+            }
+            
+            .stats-dashboard {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .photos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 8px;
+            }
+            
+            .tinder-container {
+                height: 500px;
+                margin: 0 10px;
+            }
+        }
+
+        .swipe-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .swipe-hint.delete {
+            background: rgba(255, 71, 87, 0.9);
+        }
+
+        .swipe-hint.keep {
+            background: rgba(46, 213, 115, 0.9);
+        }
+
+        .infinite-scroll-trigger {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .category-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding: 0 0 10px 0;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            border: 2px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 Cleanup Pro</h1>
+            <p>스마트 사진 정리 & 관리 도구</p>
+        </div>
+
+        <div class="stats-dashboard">
+            <div class="stat-card">
+                <span class="stat-number" id="totalPhotos">0</span>
+                <div class="stat-label">전체 사진</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="duplicatePhotos">0</span>
+                <div class="stat-label">중복 사진</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="blurryPhotos">0</span>
+                <div class="stat-label">흐릿한 사진</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="trashCount">0</span>
+                <div class="stat-label">휴지통</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('dashboard')">대시보드</div>
+            <div class="tab" onclick="switchTab('all-photos')">전체 사진</div>
+            <div class="tab" onclick="switchTab('duplicates')">중복 사진</div>
+            <div class="tab" onclick="switchTab('tinder')">스와이프 정리</div>
+            <div class="tab" onclick="switchTab('trash')">휴지통</div>
+        </div>
+
+        <div id="dashboard" class="tab-content active">
+            <div class="controls">
+                <button class="btn btn-primary" onclick="loadPhotos()">사진 불러오기</button>
+                <button class="btn btn-danger" onclick="findDuplicates()">중복 사진 찾기</button>
+                <button class="btn btn-success" onclick="findBlurryPhotos()">흐릿한 사진 찾기</button>
+            </div>
+            
+            <div id="scanProgress" style="display: none;">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <p id="progressText">스캔 중...</p>
+            </div>
+
+            <div id="dashboardContent">
+                <div class="empty-state">
+                    <h3>📱 사진을 불러와서 시작하세요</h3>
+                    <p>최대 30,000장까지 지원하며, 중복 사진과 흐릿한 사진을 자동으로 감지합니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="all-photos" class="tab-content">
+            <div class="controls">
+                <select class="filter-select" id="sortFilter" onchange="sortPhotos()">
+                    <option value="date-desc">최신 순</option>
+                    <option value="date-asc">오래된 순</option>
+                    <option value="size-desc">큰 파일 순</option>
+                    <option value="size-asc">작은 파일 순</option>
+                </select>
+                <button class="btn btn-danger" onclick="deleteSelectedPhotos()">선택 삭제</button>
+                <button class="btn btn-primary" onclick="selectAllPhotos()">전체 선택</button>
+            </div>
+            
+            <div class="photos-grid" id="allPhotosGrid"></div>
+            <div class="infinite-scroll-trigger" id="infiniteScrollTrigger">
+                <div class="spinner" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div id="duplicates" class="tab-content">
+            <div class="controls">
+                <button class="btn btn-danger" onclick="autoDeleteDuplicates()">자동 정리</button>
+                <button class="btn btn-primary" onclick="selectAllDuplicates()">전체 선택</button>
+            </div>
+            
+            <div class="photos-grid" id="duplicatesGrid"></div>
+        </div>
+
+        <div id="tinder" class="tab-content">
+            <div class="category-filter">
+                <button class="category-btn active" onclick="setTinderFilter('all')">전체</button>
+                <button class="category-btn" onclick="setTinderFilter('duplicates')">중복 사진</button>
+                <button class="category-btn" onclick="setTinderFilter('blurry')">흐릿한 사진</button>
+                <button class="category-btn" onclick="setTinderFilter('screenshots')">스크린샷</button>
+                <button class="category-btn" onclick="setTinderFilter('large')">큰 파일</button>
+            </div>
+            
+            <div class="tinder-container" id="tinderContainer">
+                <div id="tinderEmpty" class="empty-state">
+                    <h3>🎉 모든 사진 정리 완료!</h3>
+                    <p>정리할 사진이 없습니다.</p>
+                </div>
+            </div>
+            
+            <div class="tinder-actions">
+                <button class="action-btn delete" onclick="swipeDelete()">🗑️</button>
+                <button class="action-btn keep" onclick="swipeKeep()">❤️</button>
+            </div>
+        </div>
+
+        <div id="trash" class="tab-content">
+            <div class="controls">
+                <button class="btn btn-success" onclick="restoreAllFromTrash()">전체 복원</button>
+                <button class="btn btn-danger" onclick="emptyTrash()">휴지통 비우기</button>
+            </div>
+            
+            <div id="trashItems"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 전역 변수
+        let allPhotos = [];
+        let duplicatePhotos = [];
+        let blurryPhotos = [];
+        let trashItems = [];
+        let tinderCards = [];
+        let currentTinderFilter = 'all';
+        let selectedPhotos = new Set();
+        let currentPhotoIndex = 0;
+        let isLoading = false;
+        const PHOTOS_PER_PAGE = 50;
+
+        // 탭 전환
+        function switchTab(tabName) {
+            // 모든 탭 비활성화
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // 선택된 탭 활성화
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            // 탭별 초기화
+            if (tabName === 'tinder') {
+                initializeTinderCards();
+            } else if (tabName === 'all-photos') {
+                displayAllPhotos();
+            } else if (tabName === 'duplicates') {
+                displayDuplicates();
+            } else if (tabName === 'trash') {
+                displayTrash();
+            }
+        }
+
+        // 토스트 메시지 표시
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 통계 업데이트
+        function updateStats() {
+            document.getElementById('totalPhotos').textContent = allPhotos.length;
+            document.getElementById('duplicatePhotos').textContent = duplicatePhotos.length;
+            document.getElementById('blurryPhotos').textContent = blurryPhotos.length;
+            document.getElementById('trashCount').textContent = trashItems.length;
+        }
+
+        // 더미 사진 데이터 생성 (실제 구현에서는 File API 사용)
+        function generateDummyPhotos(count = 100) {
+            const photos = [];
+            const categories = ['portrait', 'landscape', 'nature', 'city', 'food', 'animals'];
+            
+            for (let i = 0; i < count; i++) {
+                const category = categories[Math.floor(Math.random() * categories.length)];
+                const id = `photo_${Date.now()}_${i}`;
+                
+                photos.push({
+                    id: id,
+                    url: `https://picsum.photos/400/400?random=${i}&category=${category}`,
+                    name: `IMG_${String(i + 1).padStart(4, '0')}.jpg`,
+                    size: Math.floor(Math.random() * 5000000) + 500000, // 0.5MB - 5.5MB
+                    date: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000),
+                    category: category,
+                    isDuplicate: Math.random() < 0.15, // 15% 중복
+                    isBlurry: Math.random() < 0.1, // 10% 흐릿함
+                    isScreenshot: Math.random() < 0.05, // 5% 스크린샷
+                });
+            }
+            
+            return photos;
+        }
+
+        // 사진 불러오기
+        async function loadPhotos() {
+            showProgressBar();
+            
+            try {
+                // 실제 구현에서는 여기서 File API 또는 웹 API를 사용
+                await simulateProgress();
+                allPhotos = generateDummyPhotos(Math.floor(Math.random() * 500) + 100);
+                
+                showToast('사진을 성공적으로 불러왔습니다!');
+                updateStats();
+                
+            } catch (error) {
+                showToast('사진 불러오기에 실패했습니다.', 'error');
+            } finally {
+                hideProgressBar();
+            }
+        }
+
+        // 중복 사진 찾기
+        async function findDuplicates() {
+            if (allPhotos.length === 0) {
+                showToast('먼저 사진을 불러와주세요.', 'warning');
+                return;
+            }
+            
+            showProgressBar();
+            
+            try {
+                await simulateProgress();
+                duplicatePhotos = allPhotos.filter(photo => photo.isDuplicate);
+                
+                showToast(`${duplicatePhotos.length}개의 중복 사진을 발견했습니다!`);
+                updateStats();
+                
+            } catch (error) {
+                showToast('중복 사진 검색에 실패했습니다.', 'error');
+            } finally {
+                hideProgressBar();
+            }
+        }
+
+        // 흐릿한 사진 찾기
+        async function findBlurryPhotos() {
+            if (allPhotos.length === 0) {
+                showToast('먼저 사진을 불러와주세요.', 'warning');
+                return;
+            }
+            
+            showProgressBar();
+            
+            try {
+                await simulateProgress();
+                blurryPhotos = allPhotos.filter(photo => photo.isBlurry);
+                
+                showToast(`${blurryPhotos.length}개의 흐릿한 사진을 발견했습니다!`);
+                updateStats();
+                
+            } catch (error) {
+                showToast('흐릿한 사진 검색에 실패했습니다.', 'error');
+            } finally {
+                hideProgressBar();
+            }
+        }
+
+        // 진행률 표시
+        function showProgressBar() {
+            document.getElementById('scanProgress').style.display = 'block';
+        }
+
+        function hideProgressBar() {
+            document.getElementById('scanProgress').style.display = 'none';
+            document.getElementById('progressFill').style.width = '0%';
+        }
+
+        async function simulateProgress() {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            for (let i = 0; i <= 100; i += 10) {
+                progressFill.style.width = i + '%';
+                progressText.textContent = `처리 중... ${i}%`;
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+        }
+
+        // 전체 사진 표시
+        function displayAllPhotos() {
+            const grid = document.getElementById('allPhotosGrid');
+            grid.innerHTML = '';
+            
+            const photosToShow = allPhotos.slice(0, PHOTOS_PER_PAGE);
+            
+            photosToShow.forEach(photo => {
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'photo-item';
+                photoDiv.innerHTML = `
+                    <img src="${photo.url}" alt="${photo.name}" loading="lazy">
+                    <div class="photo-select ${selectedPhotos.has(photo.id) ? 'selected' : ''}" 
+                         onclick="togglePhotoSelection('${photo.id}')"></div>
+                    ${photo.isDuplicate ? '<div class="duplicate-badge">중복</div>' : ''}
+                `;
+                grid.appendChild(photoDiv);
+            });
+            
+            setupInfiniteScroll();
+        }
+
+        // 무한 스크롤 설정
+        function setupInfiniteScroll() {
+            const trigger = document.getElementById('infiniteScrollTrigger');
+            const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting && !isLoading) {
+                    loadMorePhotos();
+                }
+            });
+            
+            observer.observe(trigger);
+        }
+
+        // 더 많은 사진 로드
+        function loadMorePhotos() {
+            if (currentPhotoIndex >= allPhotos.length) return;
+            
+            isLoading = true;
+            const spinner = document.querySelector('#infiniteScrollTrigger .spinner');
+            spinner.style.display = 'block';
+            
+            setTimeout(() => {
+                const grid = document.getElementById('allPhotosGrid');
+                const nextPhotos = allPhotos.slice(currentPhotoIndex, currentPhotoIndex + PHOTOS_PER_PAGE);
+                
+                nextPhotos.forEach(photo => {
+                    const photoDiv = document.createElement('div');
+                    photoDiv.className = 'photo-item';
+                    photoDiv.innerHTML = `
+                        <img src="${photo.url}" alt="${photo.name}" loading="lazy">
+                        <div class="photo-select ${selectedPhotos.has(photo.id) ? 'selected' : ''}" 
+                             onclick="togglePhotoSelection('${photo.id}')"></div>
+                        ${photo.isDuplicate ? '<div class="duplicate-badge">중복</div>' : ''}
+                    `;
+                    grid.appendChild(photoDiv);
+                });
+                
+                currentPhotoIndex += PHOTOS_PER_PAGE;
+                spinner.style.display = 'none';
+                isLoading = false;
+            }, 500);
+        }
+
+        // 사진 선택 토글
+        function togglePhotoSelection(photoId) {
+            if (selectedPhotos.has(photoId)) {
+                selectedPhotos.delete(photoId);
+            } else {
+                selectedPhotos.add(photoId);
+            }
+            
+            // UI 업데이트
+            const selectElement = document.querySelector(`[onclick="togglePhotoSelection('${photoId}')"]`);
+            if (selectElement) {
+                selectElement.classList.toggle('selected', selectedPhotos.has(photoId));
+            }
+        }
+
+        // 모든 사진 선택
+        function selectAllPhotos() {
+            allPhotos.forEach(photo => selectedPhotos.add(photo.id));
+            document.querySelectorAll('.photo-select').forEach(el => el.classList.add('selected'));
+            showToast('모든 사진을 선택했습니다.');
+        }
+
+        // 선택된 사진 삭제
+        function deleteSelectedPhotos() {
+            if (selectedPhotos.size === 0) {
+                showToast('삭제할 사진을 선택해주세요.', 'warning');
+                return;
+            }
+            
+            const selectedArray = Array.from(selectedPhotos);
+            const photosToDelete = allPhotos.filter(photo => selectedPhotos.has(photo.id));
+            
+            // 휴지통으로 이동
+            trashItems.push(...photosToDelete);
+            
+            // 원본 배열에서 제거
+            allPhotos = allPhotos.filter(photo => !selectedPhotos.has(photo.id));
+            duplicatePhotos = duplicatePhotos.filter(photo => !selectedPhotos.has(photo.id));
+            blurryPhotos = blurryPhotos.filter(photo => !selectedPhotos.has(photo.id));
+            
+            selectedPhotos.clear();
+            updateStats();
+            displayAllPhotos();
+            
+            showToast(`${selectedArray.length}개 사진을 휴지통으로 이동했습니다.`);
+        }
+
+        // 사진 정렬
+        function sortPhotos() {
+            const sortType = document.getElementById('sortFilter').value;
+            
+            switch(sortType) {
+                case 'date-desc':
+                    allPhotos.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    break;
+                case 'date-asc':
+                    allPhotos.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    break;
+                case 'size-desc':
+                    allPhotos.sort((a, b) => b.size - a.size);
+                    break;
+                case 'size-asc':
+                    allPhotos.sort((a, b) => a.size - b.size);
+                    break;
+            }
+            
+            currentPhotoIndex = 0;
+            displayAllPhotos();
+        }
+
+        // 중복 사진 표시
+        function displayDuplicates() {
+            const grid = document.getElementById('duplicatesGrid');
+            grid.innerHTML = '';
+            
+            if (duplicatePhotos.length === 0) {
+                grid.innerHTML = '<div class="empty-state"><h3>중복 사진이 없습니다</h3><p>중복 사진 스캔을 실행해보세요.</p></div>';
+                return;
+            }
+            
+            duplicatePhotos.forEach(photo => {
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'photo-item';
+                photoDiv.innerHTML = `
+                    <img src="${photo.url}" alt="${photo.name}" loading="lazy">
+                    <div class="photo-select ${selectedPhotos.has(photo.id) ? 'selected' : ''}" 
+                         onclick="togglePhotoSelection('${photo.id}')"></div>
+                    <div class="duplicate-badge">중복</div>
+                `;
+                grid.appendChild(photoDiv);
+            });
+        }
+
+        // 모든 중복 사진 선택
+        function selectAllDuplicates() {
+            duplicatePhotos.forEach(photo => selectedPhotos.add(photo.id));
+            document.querySelectorAll('#duplicatesGrid .photo-select').forEach(el => el.classList.add('selected'));
+            showToast('모든 중복 사진을 선택했습니다.');
+        }
+
+        // 자동 중복 제거
+        function autoDeleteDuplicates() {
+            if (duplicatePhotos.length === 0) {
+                showToast('중복 사진이 없습니다.', 'warning');
+                return;
+            }
+            
+            // 휴지통으로 이동
+            trashItems.push(...duplicatePhotos);
+            
+            // 원본 배열에서 제거
+            allPhotos = allPhotos.filter(photo => !photo.isDuplicate);
+            const deletedCount = duplicatePhotos.length;
+            duplicatePhotos = [];
+            
+            updateStats();
+            displayDuplicates();
+            
+            showToast(`${deletedCount}개의 중복 사진을 자동 정리했습니다.`);
+        }
+
+        // Tinder 스타일 카드 초기화
+        function initializeTinderCards() {
+            const container = document.getElementById('tinderContainer');
+            const emptyState = document.getElementById('tinderEmpty');
+            
+            let photosForTinder = getPhotosForTinder();
+            
+            if (photosForTinder.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            container.innerHTML = '';
+            tinderCards = [];
+            
+            // 최대 3장의 카드만 표시 (성능 최적화)
+            const cardsToShow = Math.min(3, photosForTinder.length);
+            
+            for (let i = 0; i < cardsToShow; i++) {
+                const card = createTinderCard(photosForTinder[i], i);
+                container.appendChild(card);
+                tinderCards.push({
+                    element: card,
+                    photo: photosForTinder[i],
+                    index: i
+                });
+            }
+            
+            setupSwipeGestures();
+        }
+
+        // Tinder 필터에 따른 사진 가져오기
+        function getPhotosForTinder() {
+            switch(currentTinderFilter) {
+                case 'duplicates':
+                    return duplicatePhotos.slice();
+                case 'blurry':
+                    return blurryPhotos.slice();
+                case 'screenshots':
+                    return allPhotos.filter(photo => photo.isScreenshot);
+                case 'large':
+                    return allPhotos.filter(photo => photo.size > 3000000).slice();
+                default:
+                    return allPhotos.filter(photo => 
+                        photo.isDuplicate || photo.isBlurry || photo.isScreenshot || photo.size > 3000000
+                    );
+            }
+        }
+
+        // Tinder 카드 생성
+        function createTinderCard(photo, index) {
+            const card = document.createElement('div');
+            card.className = 'tinder-card';
+            card.style.zIndex = 10 - index;
+            card.style.transform = `scale(${1 - index * 0.05}) translateY(${index * 10}px)`;
+            
+            card.innerHTML = `
+                <img src="${photo.url}" alt="${photo.name}" loading="lazy">
+                <div class="tinder-card-info">
+                    <h3>${photo.name}</h3>
+                    <p>크기: ${(photo.size / 1024 / 1024).toFixed(1)}MB</p>
+                    <p>날짜: ${photo.date.toLocaleDateString()}</p>
+                    ${photo.isDuplicate ? '<div class="duplicate-badge">중복</div>' : ''}
+                </div>
+                <div class="swipe-hint"></div>
+            `;
+            
+            return card;
+        }
+
+        // 스와이프 제스처 설정
+        function setupSwipeGestures() {
+            tinderCards.forEach(cardObj => {
+                let isDragging = false;
+                let startX = 0;
+                let startY = 0;
+                let currentX = 0;
+                let currentY = 0;
+                
+                const card = cardObj.element;
+                const hint = card.querySelector('.swipe-hint');
+                
+                // 터치 이벤트
+                card.addEventListener('touchstart', handleStart, { passive: false });
+                card.addEventListener('touchmove', handleMove, { passive: false });
+                card.addEventListener('touchend', handleEnd, { passive: false });
+                
+                // 마우스 이벤트
+                card.addEventListener('mousedown', handleStart);
+                card.addEventListener('mousemove', handleMove);
+                card.addEventListener('mouseup', handleEnd);
+                
+                function handleStart(e) {
+                    e.preventDefault();
+                    if (cardObj.index !== 0) return; // 맨 앞 카드만 조작 가능
+                    
+                    isDragging = true;
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    
+                    startX = clientX;
+                    startY = clientY;
+                    
+                    card.style.transition = 'none';
+                }
+                
+                function handleMove(e) {
+                    if (!isDragging || cardObj.index !== 0) return;
+                    e.preventDefault();
+                    
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    
+                    currentX = clientX - startX;
+                    currentY = clientY - startY;
+                    
+                    const rotation = currentX * 0.1;
+                    card.style.transform = `translateX(${currentX}px) translateY(${currentY}px) rotate(${rotation}deg)`;
+                    
+                    // 힌트 표시
+                    if (Math.abs(currentX) > 50) {
+                        if (currentX > 0) {
+                            hint.textContent = '보관';
+                            hint.className = 'swipe-hint keep';
+                            hint.style.opacity = '1';
+                        } else {
+                            hint.textContent = '삭제';
+                            hint.className = 'swipe-hint delete';
+                            hint.style.opacity = '1';
+                        }
+                    } else {
+                        hint.style.opacity = '0';
+                    }
+                }
+                
+                function handleEnd(e) {
+                    if (!isDragging || cardObj.index !== 0) return;
+                    isDragging = false;
+                    
+                    const threshold = 100;
+                    
+                    if (Math.abs(currentX) > threshold) {
+                        // 스와이프 완료
+                        const direction = currentX > 0 ? 'keep' : 'delete';
+                        animateCardOut(card, direction, cardObj.photo);
+                    } else {
+                        // 스와이프 취소
+                        card.style.transition = 'transform 0.3s ease';
+                        card.style.transform = 'translateX(0) translateY(0) rotate(0deg)';
+                        hint.style.opacity = '0';
+                    }
+                    
+                    currentX = 0;
+                    currentY = 0;
+                }
+            });
+        }
+
+        // 카드 애니메이션 아웃
+        function animateCardOut(card, direction, photo) {
+            const translateX = direction === 'keep' ? '100vw' : '-100vw';
+            const rotation = direction === 'keep' ? '30deg' : '-30deg';
+            
+            card.style.transition = 'transform 0.3s ease';
+            card.style.transform = `translateX(${translateX}) rotate(${rotation})`;
+            
+            setTimeout(() => {
+                handleSwipeAction(direction, photo);
+                updateTinderStack();
+            }, 300);
+        }
+
+        // 스와이프 액션 처리
+        function handleSwipeAction(direction, photo) {
+            if (direction === 'delete') {
+                // 휴지통으로 이동
+                trashItems.push(photo);
+                
+                // 모든 배열에서 제거
+                allPhotos = allPhotos.filter(p => p.id !== photo.id);
+                duplicatePhotos = duplicatePhotos.filter(p => p.id !== photo.id);
+                blurryPhotos = blurryPhotos.filter(p => p.id !== photo.id);
+                
+                showToast('사진을 삭제했습니다.');
+            } else {
+                showToast('사진을 보관했습니다.');
+            }
+            
+            updateStats();
+        }
+
+        // Tinder 스택 업데이트
+        function updateTinderStack() {
+            const container = document.getElementById('tinderContainer');
+            
+            // 첫 번째 카드 제거
+            if (tinderCards.length > 0) {
+                container.removeChild(tinderCards[0].element);
+                tinderCards.shift();
+            }
+            
+            // 남은 카드들 인덱스 업데이트
+            tinderCards.forEach((cardObj, index) => {
+                cardObj.index = index;
+                cardObj.element.style.zIndex = 10 - index;
+                cardObj.element.style.transition = 'transform 0.3s ease';
+                cardObj.element.style.transform = `scale(${1 - index * 0.05}) translateY(${index * 10}px)`;
+            });
+            
+            // 새 카드 추가 (필요한 경우)
+            const photosForTinder = getPhotosForTinder();
+            const currentCardCount = tinderCards.length;
+            
+            if (currentCardCount < 3 && photosForTinder.length > currentCardCount) {
+                const newPhoto = photosForTinder[currentCardCount];
+                const newCard = createTinderCard(newPhoto, currentCardCount);
+                container.appendChild(newCard);
+                
+                tinderCards.push({
+                    element: newCard,
+                    photo: newPhoto,
+                    index: currentCardCount
+                });
+            }
+            
+            // 모든 카드가 없으면 완료 상태 표시
+            if (tinderCards.length === 0) {
+                document.getElementById('tinderEmpty').style.display = 'block';
+            }
+            
+            // 새로운 제스처 설정
+            setTimeout(() => {
+                setupSwipeGestures();
+            }, 300);
+        }
+
+        // 버튼으로 스와이프 액션
+        function swipeDelete() {
+            if (tinderCards.length > 0) {
+                const topCard = tinderCards[0];
+                animateCardOut(topCard.element, 'delete', topCard.photo);
+            }
+        }
+
+        function swipeKeep() {
+            if (tinderCards.length > 0) {
+                const topCard = tinderCards[0];
+                animateCardOut(topCard.element, 'keep', topCard.photo);
+            }
+        }
+
+        // Tinder 필터 설정
+        function setTinderFilter(filter) {
+            currentTinderFilter = filter;
+            
+            // 필터 버튼 활성화 상태 업데이트
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 카드 스택 재초기화
+            initializeTinderCards();
+        }
+
+        // 휴지통 표시
+        function displayTrash() {
+            const container = document.getElementById('trashItems');
+            container.innerHTML = '';
+            
+            if (trashItems.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>휴지통이 비어있습니다</h3><p>삭제된 사진이 없습니다.</p></div>';
+                return;
+            }
+            
+            trashItems.forEach((photo, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'trash-item';
+                itemDiv.innerHTML = `
+                    <img src="${photo.url}" alt="${photo.name}">
+                    <div class="trash-item-info">
+                        <h4>${photo.name}</h4>
+                        <p>크기: ${(photo.size / 1024 / 1024).toFixed(1)}MB</p>
+                        <p>삭제일: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    <div class="trash-actions">
+                        <button class="btn btn-success btn-small" onclick="restorePhoto(${index})">복원</button>
+                        <button class="btn btn-danger btn-small" onclick="permanentDelete(${index})">영구삭제</button>
+                    </div>
+                `;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        // 사진 복원
+        function restorePhoto(index) {
+            const photo = trashItems[index];
+            allPhotos.push(photo);
+            trashItems.splice(index, 1);
+            
+            updateStats();
+            displayTrash();
+            showToast('사진을 복원했습니다.');
+        }
+
+        // 영구 삭제
+        function permanentDelete(index) {
+            trashItems.splice(index, 1);
+            updateStats();
+            displayTrash();
+            showToast('사진을 영구 삭제했습니다.');
+        }
+
+        // 전체 복원
+        function restoreAllFromTrash() {
+            if (trashItems.length === 0) {
+                showToast('복원할 사진이 없습니다.', 'warning');
+                return;
+            }
+            
+            const count = trashItems.length;
+            allPhotos.push(...trashItems);
+            trashItems = [];
+            
+            updateStats();
+            displayTrash();
+            showToast(`${count}개 사진을 모두 복원했습니다.`);
+        }
+
+        // 휴지통 비우기
+        function emptyTrash() {
+            if (trashItems.length === 0) {
+                showToast('휴지통이 이미 비어있습니다.', 'warning');
+                return;
+            }
+            
+            const count = trashItems.length;
+            trashItems = [];
+            
+            updateStats();
+            displayTrash();
+            showToast(`${count}개 사진을 영구 삭제했습니다.`);
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            // 기본 더미 데이터 로드 (데모용)
+            setTimeout(() => {
+                loadPhotos().then(() => {
+                    findDuplicates();
+                    findBlurryPhotos();
+                });
+            }, 1000);
+            
+            updateStats();
+        });
+
+        // 반응형 처리
+        window.addEventListener('resize', function() {
+            if (document.getElementById('tinder').classList.contains('active')) {
+                initializeTinderCards();
+            }
+        });
+    </script>
+</body>
+</html>
