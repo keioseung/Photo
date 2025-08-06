@@ -16,6 +16,9 @@ JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 # 클라이언트 설정 (배포 후 실제 도메인으로 변경)
 REACT_APP_API_URL=https://your-railway-domain.railway.app/api
 
+# React 개발 서버 설정 (Host header 문제 해결)
+DANGEROUSLY_DISABLE_HOST_CHECK=true
+
 # ===== 선택적 환경변수 =====
 
 # 파일 업로드 설정

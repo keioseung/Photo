@@ -28,9 +28,12 @@ npm run dev
 1. Railway 계정 생성 및 프로젝트 생성
 2. GitHub 저장소 연결
 3. 환경 변수 설정:
-   - `PORT`: 서버 포트 (기본값: 3001)
-   - `MONGODB_URI`: MongoDB 연결 문자열
+   - `PORT`: 서버 포트 (기본값: 3020)
+   - `NODE_ENV`: production
    - `JWT_SECRET`: JWT 시크릿 키
+   - `REACT_APP_API_URL`: API URL
+   - `DANGEROUSLY_DISABLE_HOST_CHECK`: true (Host header 문제 해결)
+   - `MONGODB_URI`: MongoDB 연결 문자열 (선택사항)
 
 ## 🛠️ 기술 스택
 
