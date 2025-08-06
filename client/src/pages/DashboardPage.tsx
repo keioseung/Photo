@@ -24,7 +24,7 @@ import api from '../services/api.ts';
 import { StatsSummary } from '../types/index.ts';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner.tsx';
 import { PhotoUpload } from '../components/photos/PhotoUpload.tsx';
-import { Layout } from '../components/layout/Layout.tsx';
+
 
 export const DashboardPage: React.FC = () => {
   const [showUpload, setShowUpload] = useState(false);
@@ -162,8 +162,7 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
-      <Layout>
-        <div className="w-full">
+      <div className="w-full">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -422,7 +421,6 @@ export const DashboardPage: React.FC = () => {
           />
         )}
       </div>
-      </Layout>
     </div>
   );
 }; 
