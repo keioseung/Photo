@@ -10,7 +10,6 @@ import { TrashPage } from './pages/TrashPage.tsx';
 import { SettingsPage } from './pages/SettingsPage.tsx';
 
 const AppContent: React.FC = () => {
-  const { isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
