@@ -11,14 +11,19 @@ const photoRoutes = require('./routes/photos');
 const userRoutes = require('./routes/users');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3020;
+
+// 개발 환경 설정
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = 'development';
+}
 
 // 보안 미들웨어
 app.use(helmet());
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? ['https://your-domain.railway.app'] 
-    : ['http://localhost:3000'],
+    : ['http://localhost:3010'],
   credentials: true
 }));
 
@@ -74,24 +79,33 @@ app.use('*', (req, res) => {
   res.status(404).json({ error: '요청한 리소스를 찾을 수 없습니다.' });
 });
 
-// MongoDB 연결
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cleanup-pro', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('✅ MongoDB 연결 성공');
-  
-  // 서버 시작
+// MongoDB 연결 (개발 모드에서는 선택적)
+const startServer = () => {
   app.listen(PORT, () => {
     console.log(`🚀 서버가 포트 ${PORT}에서 실행 중입니다`);
     console.log(`📱 환경: ${process.env.NODE_ENV || 'development'}`);
   });
-})
-.catch((err) => {
-  console.error('❌ MongoDB 연결 실패:', err);
-  process.exit(1);
-});
+};
+
+if (process.env.NODE_ENV === 'production') {
+  // 프로덕션에서는 MongoDB 필수
+  mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cleanup-pro', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log('✅ MongoDB 연결 성공');
+    startServer();
+  })
+  .catch((err) => {
+    console.error('❌ MongoDB 연결 실패:', err);
+    process.exit(1);
+  });
+} else {
+  // 개발 모드에서는 MongoDB 없이도 실행 가능
+  console.log('⚠️ 개발 모드: MongoDB 없이 실행 중 (일부 기능 제한)');
+  startServer();
+}
 
 // Graceful shutdown
 process.on('SIGTERM', () => {

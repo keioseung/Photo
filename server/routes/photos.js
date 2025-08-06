@@ -45,13 +45,47 @@ const upload = multer({
   }
 });
 
-// 사진 업로드
+// 사진 업로드 (개발 모드용 더미 응답)
 router.post('/upload', auth, checkStorageLimit, upload.array('photos', 10), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ error: '업로드할 파일을 선택해주세요.' });
     }
 
+    // 개발 모드에서는 더미 응답
+    if (process.env.NODE_ENV !== 'production') {
+      const dummyPhotos = req.files.map((file, index) => ({
+        id: `dummy-photo-${index}`,
+        originalName: file.originalname,
+        filename: file.filename,
+        size: file.size,
+        mimeType: file.mimetype,
+        width: 1920,
+        height: 1080,
+        url: `/uploads/${file.filename}`,
+        thumbnailUrl: `/uploads/thumbnails/thumb_${file.filename}`,
+        analysis: {
+          isDuplicate: false,
+          isBlurry: false,
+          isScreenshot: false,
+          quality: 85,
+          brightness: 0.6,
+          contrast: 0.7,
+          sharpness: 0.8
+        },
+        isFavorite: false,
+        tags: [],
+        createdAt: new Date()
+      }));
+
+      return res.json({
+        message: '사진이 성공적으로 업로드되었습니다. (개발 모드)',
+        photos: dummyPhotos,
+        totalUploaded: dummyPhotos.length
+      });
+    }
+
+    // 프로덕션에서는 실제 처리
     const uploadedPhotos = [];
     const errors = [];
 
@@ -127,7 +161,7 @@ router.post('/upload', auth, checkStorageLimit, upload.array('photos', 10), asyn
   }
 });
 
-// 사진 목록 조회
+// 사진 목록 조회 (개발 모드용 더미 응답)
 router.get('/', auth, [
   query('page').optional().isInt({ min: 1 }).withMessage('페이지는 1 이상이어야 합니다'),
   query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('한 번에 최대 100개까지 조회 가능합니다'),
@@ -152,7 +186,47 @@ router.get('/', auth, [
       filter = 'all'
     } = req.query;
 
-    // 쿼리 조건 구성
+    // 개발 모드에서는 더미 응답
+    if (process.env.NODE_ENV !== 'production') {
+      const dummyPhotos = Array.from({ length: Math.min(limit, 10) }, (_, index) => ({
+        id: `dummy-photo-${index}`,
+        originalName: `sample-photo-${index + 1}.jpg`,
+        filename: `dummy-${index + 1}.jpg`,
+        size: 1024 * 1024 * (Math.random() * 5 + 1), // 1-6MB
+        mimeType: 'image/jpeg',
+        width: 1920,
+        height: 1080,
+        url: `/uploads/dummy-${index + 1}.jpg`,
+        thumbnailUrl: `/uploads/thumbnails/thumb_dummy-${index + 1}.jpg`,
+        analysis: {
+          isDuplicate: Math.random() > 0.8,
+          isBlurry: Math.random() > 0.7,
+          isScreenshot: Math.random() > 0.9,
+          quality: Math.random() * 100,
+          brightness: Math.random(),
+          contrast: Math.random(),
+          sharpness: Math.random()
+        },
+        isFavorite: Math.random() > 0.7,
+        tags: ['sample', 'test'],
+        status: status,
+        createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) // 최근 30일 내
+      }));
+
+      return res.json({
+        photos: dummyPhotos,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: 50,
+          totalPages: Math.ceil(50 / limit),
+          hasNext: page < Math.ceil(50 / limit),
+          hasPrev: page > 1
+        }
+      });
+    }
+
+    // 프로덕션에서는 실제 MongoDB 사용
     const query = { user: req.user._id, status };
 
     // 필터 적용
@@ -458,9 +532,24 @@ router.put('/:id/tags', auth, [
   }
 });
 
-// 통계 정보 조회
+// 통계 정보 조회 (개발 모드용 더미 응답)
 router.get('/stats/summary', auth, async (req, res) => {
   try {
+    // 개발 모드에서는 더미 응답
+    if (process.env.NODE_ENV !== 'production') {
+      return res.json({
+        totalPhotos: 50,
+        duplicatePhotos: 8,
+        blurryPhotos: 12,
+        screenshotPhotos: 5,
+        favoritePhotos: 15,
+        storageUsed: 1024 * 1024 * 150, // 150MB
+        storageLimit: 1024 * 1024 * 100, // 100MB
+        storagePercentage: 150
+      });
+    }
+
+    // 프로덕션에서는 실제 MongoDB 사용
     const [
       totalPhotos,
       duplicatePhotos,

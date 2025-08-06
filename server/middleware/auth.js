@@ -9,6 +9,27 @@ const auth = async (req, res, next) => {
       return res.status(401).json({ error: '인증 토큰이 필요합니다.' });
     }
     
+    // 개발 모드에서는 더미 사용자 사용
+    if (process.env.NODE_ENV !== 'production') {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'dev-secret');
+      if (decoded.userId === 'dummy-user-id') {
+        req.user = {
+          _id: 'dummy-user-id',
+          email: 'test@example.com',
+          name: '테스트 사용자',
+          isPremium: false,
+          storageUsed: 0,
+          storageLimit: 100 * 1024 * 1024, // 100MB
+          hasStorageSpace: (size) => true,
+          updateStorageUsed: async (size) => {},
+          comparePassword: async (password) => true
+        };
+        req.token = token;
+        return next();
+      }
+    }
+    
+    // 프로덕션에서는 실제 MongoDB 사용
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId);
     

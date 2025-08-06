@@ -15,7 +15,7 @@ const generateToken = (userId) => {
   );
 };
 
-// 회원가입
+// 회원가입 (개발 모드용 더미 응답)
 router.post('/register', [
   body('email')
     .isEmail()
@@ -41,24 +41,43 @@ router.post('/register', [
       });
     }
 
-    const { email, password, name } = req.body;
+    const { email, name } = req.body;
 
-    // 이메일 중복 확인
+    // 개발 모드에서는 더미 응답
+    if (process.env.NODE_ENV !== 'production') {
+      const dummyToken = jwt.sign(
+        { userId: 'dummy-user-id' },
+        process.env.JWT_SECRET || 'dev-secret',
+        { expiresIn: '7d' }
+      );
+
+      return res.status(201).json({
+        message: '회원가입이 완료되었습니다. (개발 모드)',
+        token: dummyToken,
+        user: {
+          id: 'dummy-user-id',
+          email: email,
+          name: name,
+          isPremium: false,
+          storageUsed: 0,
+          storageLimit: 100 * 1024 * 1024 // 100MB
+        }
+      });
+    }
+
+    // 프로덕션에서는 실제 MongoDB 사용
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ error: '이미 등록된 이메일입니다.' });
     }
 
-    // 사용자 생성
     const user = new User({
       email,
-      password,
+      password: req.body.password,
       name
     });
 
     await user.save();
-
-    // 토큰 생성
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -80,7 +99,7 @@ router.post('/register', [
   }
 });
 
-// 로그인
+// 로그인 (개발 모드용 더미 응답)
 router.post('/login', [
   body('email')
     .isEmail()
@@ -100,25 +119,45 @@ router.post('/login', [
       });
     }
 
-    const { email, password } = req.body;
+    const { email } = req.body;
 
-    // 사용자 찾기
+    // 개발 모드에서는 더미 응답
+    if (process.env.NODE_ENV !== 'production') {
+      const dummyToken = jwt.sign(
+        { userId: 'dummy-user-id' },
+        process.env.JWT_SECRET || 'dev-secret',
+        { expiresIn: '7d' }
+      );
+
+      return res.json({
+        message: '로그인이 완료되었습니다. (개발 모드)',
+        token: dummyToken,
+        user: {
+          id: 'dummy-user-id',
+          email: email,
+          name: '테스트 사용자',
+          isPremium: false,
+          storageUsed: 0,
+          storageLimit: 100 * 1024 * 1024, // 100MB
+          lastLogin: new Date()
+        }
+      });
+    }
+
+    // 프로덕션에서는 실제 MongoDB 사용
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ error: '이메일 또는 비밀번호가 올바르지 않습니다.' });
     }
 
-    // 비밀번호 확인
-    const isPasswordValid = await user.comparePassword(password);
+    const isPasswordValid = await user.comparePassword(req.body.password);
     if (!isPasswordValid) {
       return res.status(401).json({ error: '이메일 또는 비밀번호가 올바르지 않습니다.' });
     }
 
-    // 마지막 로그인 시간 업데이트
     user.lastLogin = new Date();
     await user.save();
 
-    // 토큰 생성
     const token = generateToken(user._id);
 
     res.json({
@@ -141,12 +180,29 @@ router.post('/login', [
   }
 });
 
-// 사용자 정보 조회
+// 사용자 정보 조회 (개발 모드용 더미 응답)
 router.get('/me', auth, async (req, res) => {
   try {
+    // 개발 모드에서는 더미 응답
+    if (process.env.NODE_ENV !== 'production') {
+      return res.json({
+        user: {
+          id: 'dummy-user-id',
+          email: 'test@example.com',
+          name: '테스트 사용자',
+          avatar: null,
+          isPremium: false,
+          storageUsed: 0,
+          storageLimit: 100 * 1024 * 1024, // 100MB
+          lastLogin: new Date(),
+          preferences: {},
+          createdAt: new Date()
+        }
+      });
+    }
+
+    // 프로덕션에서는 실제 MongoDB 사용
     const user = req.user;
-    
-    // 저장 공간 사용량 업데이트
     const storageUsed = await require('../models/Photo').getStorageUsed(user._id);
     user.storageUsed = storageUsed;
     await user.save();

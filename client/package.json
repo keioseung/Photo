@@ -22,7 +22,7 @@
     "tailwind-merge": "^1.13.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "PORT=3010 react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -51,5 +51,5 @@
     "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0"
   },
-  "proxy": "http://localhost:3001"
+  "proxy": "http://localhost:3020"
 } 
