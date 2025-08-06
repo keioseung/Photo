@@ -5,7 +5,6 @@ import { useMutation } from 'react-query';
 import { Eye, EyeOff, Mail, Lock, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../contexts/AuthContext.tsx';
-import api from '../services/api.ts';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');

@@ -4,7 +4,7 @@ import { useDropzone } from 'react-dropzone';
 import { useMutation, useQueryClient } from 'react-query';
 import { X, Upload, Image, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../../services/api';
+import api from '../../services/api.ts';
 
 interface PhotoUploadProps {
   isOpen: boolean;
