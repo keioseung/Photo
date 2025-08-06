@@ -1,0 +1,44 @@
+# 🚀 Railway 환경변수 설정 템플릿
+# 아래 내용을 Railway 대시보드의 Variables 탭에 복사해서 붙여넣으세요
+
+# ===== 필수 환경변수 =====
+
+# 서버 설정
+PORT=3020
+NODE_ENV=production
+
+# JWT 보안 (실제 배포시 변경 필수!)
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+
+# MongoDB 연결 (MongoDB Atlas 사용시)
+# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/cleanup-pro?retryWrites=true&w=majority
+
+# 클라이언트 설정 (배포 후 실제 도메인으로 변경)
+REACT_APP_API_URL=https://your-railway-domain.railway.app/api
+
+# ===== 선택적 환경변수 =====
+
+# 파일 업로드 설정
+MAX_FILE_SIZE=52428800
+UPLOAD_PATH=uploads
+
+# 보안 설정
+CORS_ORIGIN=https://your-railway-domain.railway.app
+RATE_LIMIT_WINDOW=900000
+RATE_LIMIT_MAX=100
+
+# ===== 개발용 설정 (선택사항) =====
+
+# 로그 레벨
+LOG_LEVEL=info
+
+# 세션 설정
+SESSION_SECRET=your-session-secret-key
+
+# ===== 사용법 =====
+# 1. Railway 대시보드에서 프로젝트 선택
+# 2. "Variables" 탭 클릭
+# 3. 위의 환경변수들을 하나씩 추가
+# 4. JWT_SECRET은 반드시 변경
+# 5. MONGODB_URI는 MongoDB Atlas 사용시 설정
+# 6. REACT_APP_API_URL은 배포 후 실제 도메인으로 변경 
