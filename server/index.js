@@ -87,9 +87,9 @@ const startServer = () => {
   });
 };
 
-if (process.env.NODE_ENV === 'production') {
-  // 프로덕션에서는 MongoDB 필수
-  mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cleanup-pro', {
+if (process.env.NODE_ENV === 'production' && process.env.MONGODB_URI) {
+  // 프로덕션에서 MongoDB URI가 설정된 경우에만 연결
+  mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -99,11 +99,15 @@ if (process.env.NODE_ENV === 'production') {
   })
   .catch((err) => {
     console.error('❌ MongoDB 연결 실패:', err);
-    process.exit(1);
+    console.log('⚠️ MongoDB 없이 서버를 시작합니다 (일부 기능 제한)');
+    startServer();
   });
 } else {
-  // 개발 모드에서는 MongoDB 없이도 실행 가능
-  console.log('⚠️ 개발 모드: MongoDB 없이 실행 중 (일부 기능 제한)');
+  // MongoDB URI가 없거나 개발 모드인 경우
+  console.log('⚠️ MongoDB 없이 실행 중 (일부 기능 제한)');
+  if (process.env.NODE_ENV === 'production') {
+    console.log('💡 MongoDB Atlas를 사용하려면 MONGODB_URI 환경변수를 설정하세요');
+  }
   startServer();
 }
 

@@ -27,6 +27,9 @@ PORT=3020
 NODE_ENV=production
 JWT_SECRET=생성된_키_여기에_붙여넣기
 REACT_APP_API_URL=https://your-railway-domain.railway.app/api
+
+# MongoDB Atlas 사용시 (선택사항)
+# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/cleanup-pro?retryWrites=true&w=majority
 ```
 
 ### 4단계: 배포 확인 (1분)

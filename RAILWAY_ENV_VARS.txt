@@ -10,7 +10,7 @@ NODE_ENV=production
 # JWT 보안 (실제 배포시 변경 필수!)
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 
-# MongoDB 연결 (MongoDB Atlas 사용시)
+# MongoDB 연결 (MongoDB Atlas 사용시 - 선택사항)
 # MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/cleanup-pro?retryWrites=true&w=majority
 
 # 클라이언트 설정 (배포 후 실제 도메인으로 변경)
