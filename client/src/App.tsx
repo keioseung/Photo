@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AuthProvider, useAuth } from './contexts/AuthContext.tsx';
+import { AuthProvider } from './contexts/AuthContext.tsx';
 import { LoadingSpinner } from './components/ui/LoadingSpinner.tsx';
 import { DashboardPage } from './pages/DashboardPage.tsx';
 import { PhotosPage } from './pages/PhotosPage.tsx';
