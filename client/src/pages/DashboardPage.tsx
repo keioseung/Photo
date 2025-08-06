@@ -15,11 +15,11 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import api from '../services/api';
-import { StatsSummary } from '../types';
-import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { PhotoUpload } from '../components/photos/PhotoUpload';
-import { Layout } from '../components/layout/Layout';
+import api from '../services/api.ts';
+import { StatsSummary } from '../types/index.ts';
+import { LoadingSpinner } from '../components/ui/LoadingSpinner.tsx';
+import { PhotoUpload } from '../components/photos/PhotoUpload.tsx';
+import { Layout } from '../components/layout/Layout.tsx';
 
 export const DashboardPage: React.FC = () => {
   const [showUpload, setShowUpload] = useState(false);

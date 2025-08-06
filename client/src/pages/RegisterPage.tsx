@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useMutation } from 'react-query';
 import { Eye, EyeOff, Mail, Lock, User, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext.tsx';
 
 export const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
