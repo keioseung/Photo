@@ -23,13 +23,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in
-    const token = api.getToken();
-    const savedUser = api.getUser();
+    // 테스트 모드: 자동으로 더미 사용자 로그인
+    const dummyUser: User = {
+      _id: 'dummy-user-id',
+      email: 'test@example.com',
+      name: '테스트 사용자',
+      isPremium: false,
+      storageUsed: 0,
+      storageLimit: 100 * 1024 * 1024, // 100MB
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
     
-    if (token && savedUser) {
-      setUser(savedUser);
-    }
+    // 더미 토큰 설정
+    api.setToken('dummy-token-for-testing');
+    api.setUser(dummyUser);
+    setUser(dummyUser);
     
     setLoading(false);
   }, []);
