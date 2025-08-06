@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, Grid, List, Search, Filter, Plus, Image as ImageIcon } from 'lucide-react';
+import { Grid, List, Search, Filter, Plus, Image as ImageIcon } from 'lucide-react';
 import { PhotoUpload } from '../components/photos/PhotoUpload.tsx';
 
 export const PhotosPage: React.FC = () => {
