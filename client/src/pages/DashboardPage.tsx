@@ -161,8 +161,9 @@ export const DashboardPage: React.FC = () => {
   ];
 
   return (
-    <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <Layout>
+        <div className="w-full">
         {/* Hero Section */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -421,6 +422,7 @@ export const DashboardPage: React.FC = () => {
           />
         )}
       </div>
-    </Layout>
+      </Layout>
+    </div>
   );
 }; 
