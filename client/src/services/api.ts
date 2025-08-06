@@ -11,8 +11,7 @@ import {
   ScreenshotsResponse,
   FavoriteResponse,
   TagsResponse,
-  PhotoFilters,
-  ApiError
+  PhotoFilters
 } from '../types';
 
 class ApiService {
@@ -227,4 +226,5 @@ class ApiService {
   }
 }
 
-export default new ApiService(); 
+const apiService = new ApiService();
+export default apiService; 

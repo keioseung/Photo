@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from './services/api.ts';
-import { User } from './types/index.ts';
 import { AuthProvider, useAuth } from './contexts/AuthContext.tsx';
 import { LoadingSpinner } from './components/ui/LoadingSpinner.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
@@ -16,7 +15,7 @@ import { SettingsPage } from './pages/SettingsPage.tsx';
 import { ProtectedRoute } from './components/auth/ProtectedRoute.tsx';
 
 const AppContent: React.FC = () => {
-  const { user, setUser, isAuthenticated } = useAuth();
+  const { setUser, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
 
   // Check authentication status on app load
